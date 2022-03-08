@@ -13,6 +13,10 @@ contract GameItems is ERC1155, Ownable {
 
     }
 
+    function contractURI() public view returns (string memory) {
+        return "https://ipfs.io/ipfs/bafkreidii4qgghama3uepncfbv6qmg4xoyuxeywftjklqqfhzunttoz3sa";
+    }
+
     function claim(uint256 tokenId) external payable  {
            require(_availableSupply[tokenId] > 0, "No more supply");
            _availableSupply[tokenId] = _availableSupply[tokenId] - 1;
