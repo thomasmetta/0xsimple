@@ -5,6 +5,7 @@ import { sequence } from "0xsequence";
 
 import { ETHAuth, Proof } from "@0xsequence/ethauth";
 import { ERC_20_ABI } from "./constants/abi";
+import GAME_ABI from "./GameItems.json";
 //import { sequenceContext } from '@0xsequence/network'
 
 import { configureLogger } from "@0xsequence/utils";
@@ -457,13 +458,25 @@ And that has made all the difference.`;
     sendETH(wallet.getSigner(n));
   };
 
-  const send1155Tokens = async () => {
-    console.log("TODO");
-  };
+  const claim1155Tokens = async (signer?: sequence.provider.Web3Signer) => {
+    signer = signer || wallet.getSigner(); // select DefaultChain signer by default
 
-  // const sendBatchTransaction = async () => {
-  //   console.log('TODO')
-  // }
+    const gameContractAddress = "0x1edbf67231c589f1d7f119f691dc2c0811602af7"; // (Game address on Rinkeby)
+
+    const tx: sequence.transactions.Transaction = {
+      delegateCall: false,
+      revertOnError: false,
+      gasLimit: "0x55555",
+      to: gameContractAddress,
+      value: 0,
+      data: new ethers.utils.Interface(GAME_ABI).encodeFunctionData("claim", [
+        0,
+      ]),
+    };
+
+    const txnResp = await signer.sendTransactionBatch([tx]);
+    await txnResp.wait();
+  };
 
   return (
     <Container>
@@ -509,7 +522,7 @@ And that has made all the difference.`;
         <Button onClick={() => sendETH()}>Send on DefaultChain</Button>
         <Button onClick={() => sendETHSidechain()}>Send on AuthChain</Button>
         <Button onClick={() => sendDAI()}>Send DAI</Button>
-        <Button onClick={() => send1155Tokens()}>Send ERC-1155 Tokens</Button>
+        <Button onClick={() => claim1155Tokens()}>Claim ERC-1155 Tokens</Button>
         {/* <Button onClick={() => sendBatchTransaction()}>Send Batch Txns</Button> */}
       </Group>
     </Container>
@@ -535,67 +548,5 @@ const Description = styled("p", typography.b1, {
   color: "$textSecondary",
   marginBottom: "15px",
 });
-
-// SequenceLogo.defaultProps = logoUrl
-
-// const erc1155Abi = [
-//   {
-//     inputs: [
-//       {
-//         internalType: 'address',
-//         name: '_from',
-//         type: 'address'
-//       },
-//       {
-//         internalType: 'address',
-//         name: '_to',
-//         type: 'address'
-//       },
-//       {
-//         internalType: 'uint256',
-//         name: '_id',
-//         type: 'uint256'
-//       },
-//       {
-//         internalType: 'uint256',
-//         name: '_amount',
-//         type: 'uint256'
-//       },
-//       {
-//         internalType: 'bytes',
-//         name: '_data',
-//         type: 'bytes'
-//       }
-//     ],
-//     name: 'safeTransferFrom',
-//     outputs: [],
-//     stateMutability: 'nonpayable',
-//     type: 'function'
-//   },
-//   {
-//     inputs: [
-//       {
-//         internalType: 'address',
-//         name: '_owner',
-//         type: 'address'
-//       },
-//       {
-//         internalType: 'uint256',
-//         name: '_id',
-//         type: 'uint256'
-//       }
-//     ],
-//     name: 'balanceOf',
-//     outputs: [
-//       {
-//         internalType: 'uint256',
-//         name: '',
-//         type: 'uint256'
-//       }
-//     ],
-//     stateMutability: 'view',
-//     type: 'function'
-//   }
-// ]
 
 export default React.memo(App);
