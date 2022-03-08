@@ -18,6 +18,13 @@ configureLogger({ logLevel: "DEBUG" });
 const App = () => {
   const [selectedMetaData, setSelectedMetaData] = useState(null);
 
+  const [inputs, setInputs] = useState({
+    tokenId: null,
+    maxSupply: null,
+    name: null,
+    description: null,
+  });
+
   const network = "rinkeby";
   const wallet = new sequence.Wallet(network);
 
@@ -153,6 +160,12 @@ const App = () => {
     console.log("networks:", await wallet.getNetworks());
   };
 
+  const handleChange = (e: any) =>
+    setInputs((prevState) => ({
+      ...prevState,
+      [e.target.name]: e.target.value,
+    }));
+
   const uploadAndSetMetaData = async (event: any) => {
     if (event && event.target && event.target.files) {
       const file = event.target.files[0];
@@ -176,8 +189,8 @@ const App = () => {
       const metaDataOptions = {
         method: "POST",
         body: JSON.stringify({
-          name: "My Arttttt",
-          description: "This is my custom art piece",
+          name: inputs.name,
+          description: inputs.description,
           file_url: imageFileData.ipfs_url,
         }),
         headers: {
@@ -190,7 +203,8 @@ const App = () => {
         metaDataOptions
       ).then((response) => response.json());
 
-      setSelectedMetaData(nftMetaData);
+      setSelectedMetaData(nftMetaData.metadata_uri);
+      console.log(nftMetaData.metadata_uri);
     }
   };
 
@@ -205,7 +219,7 @@ const App = () => {
       value: 0,
       data: new ethers.utils.Interface(GAME_ABI).encodeFunctionData(
         "createToken",
-        [2, selectedMetaData, 5]
+        [inputs.tokenId, selectedMetaData, inputs.maxSupply]
       ),
     };
     const txnResp = await signer.sendTransactionBatch([tx]);
@@ -224,13 +238,15 @@ const App = () => {
       to: gameContractAddress,
       value: 0,
       data: new ethers.utils.Interface(GAME_ABI).encodeFunctionData("claim", [
-        2,
+        4,
       ]),
     };
 
     const txnResp = await signer.sendTransactionBatch([tx]);
     await txnResp.wait();
   };
+
+  console.log(inputs);
 
   return (
     <Container>
@@ -264,19 +280,52 @@ const App = () => {
       </Group>
 
       <Group label="Create token" layout="grid">
-        <input
-          type="file"
-          name="myImage"
-          onChange={(event) => {
-            uploadAndSetMetaData(event);
-          }}
-        />
-        <Button onClick={() => createToken()}>Create token</Button>
+        <Group layout="rows">
+          <SubTitle>Name:</SubTitle>
+          <input
+            name="name"
+            value={inputs.name || ""}
+            onChange={handleChange}
+          />
+
+          <SubTitle>Description:</SubTitle>
+          <input
+            name="description"
+            value={inputs.description || ""}
+            onChange={handleChange}
+          />
+
+          <SubTitle>Upload asset</SubTitle>
+          <input
+            type="file"
+            name="myImage"
+            onChange={(event) => {
+              uploadAndSetMetaData(event);
+            }}
+          />
+        </Group>
+        <Group layout="rows">
+          <SubTitle>Token Id:</SubTitle>
+          <input
+            name="tokenId"
+            value={inputs.tokenId || ""}
+            onChange={handleChange}
+          />
+
+          <SubTitle>Max Supply:</SubTitle>
+          <input
+            name="maxSupply"
+            value={inputs.maxSupply || ""}
+            onChange={handleChange}
+          />
+        </Group>
+        <Group layout="rows">
+          <Button onClick={() => createToken()}>Create token</Button>
+        </Group>
       </Group>
 
       <Group label="Transactions" layout="grid">
         <Button onClick={() => claim1155Tokens()}>Claim ERC-1155 Tokens</Button>
-        {/* <Button onClick={() => sendBatchTransaction()}>Send Batch Txns</Button> */}
       </Group>
     </Container>
   );
@@ -295,6 +344,11 @@ const SequenceLogo = styled("img", {
 const Title = styled("h1", typography.h1, {
   color: "$textPrimary",
   fontSize: "25px",
+});
+
+const SubTitle = styled("h2", typography.h2, {
+  color: "$textPrimary",
+  fontSize: "20px",
 });
 
 const Description = styled("p", typography.b1, {
