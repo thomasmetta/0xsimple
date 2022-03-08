@@ -26,6 +26,8 @@ const App = () => {
   });
 
   const network = "rinkeby";
+  const gameContractAddress = "0xD4fE9BBC942266BFB0734a0DE61F8ccc96B13fba"; // (Game address on Rinkeby
+
   const wallet = new sequence.Wallet(network);
 
   // NOTE: to use mumbai, first go to https://sequence.app and click on "Enable Testnet".
@@ -210,7 +212,7 @@ const App = () => {
 
   const createToken = async () => {
     const signer = wallet.getSigner(); // select DefaultChain signer by default
-    const gameContractAddress = "0x02Ce10542B0f787438175c42F02111FF3Bbc0F8f"; // (Game address on Rinkeby)
+
     const tx: sequence.transactions.Transaction = {
       delegateCall: false,
       revertOnError: false,
@@ -229,8 +231,6 @@ const App = () => {
   const claim1155Tokens = async (signer?: sequence.provider.Web3Signer) => {
     signer = signer || wallet.getSigner(); // select DefaultChain signer by default
 
-    const gameContractAddress = "0x02Ce10542B0f787438175c42F02111FF3Bbc0F8f"; // (Game address on Rinkeby)
-
     const tx: sequence.transactions.Transaction = {
       delegateCall: false,
       revertOnError: false,
@@ -238,7 +238,7 @@ const App = () => {
       to: gameContractAddress,
       value: 0,
       data: new ethers.utils.Interface(GAME_ABI).encodeFunctionData("claim", [
-        4,
+        0,
       ]),
     };
 
@@ -265,18 +265,6 @@ const App = () => {
         <Button onClick={() => disconnect()}>Disconnect</Button>
         <Button onClick={() => openWallet()}>Open Wallet</Button>
         <Button onClick={() => closeWallet()}>Close Wallet</Button>
-        <Button onClick={() => isConnected()}>Is Connected?</Button>
-        <Button onClick={() => isOpened()}>Is Opened?</Button>
-        <Button onClick={() => getDefaultChainID()}>DefaultChain?</Button>
-        <Button onClick={() => getAuthChainID()}>AuthChain?</Button>
-      </Group>
-
-      <Group label="State" layout="grid">
-        <Button onClick={() => getChainID()}>ChainID</Button>
-        <Button onClick={() => getNetworks()}>Networks</Button>
-        <Button onClick={() => getAccounts()}>Get Accounts</Button>
-        <Button onClick={() => getBalance()}>Get Balance</Button>
-        <Button onClick={() => getWalletState()}>Get Wallet State</Button>
       </Group>
 
       <Group label="Create token" layout="grid">
