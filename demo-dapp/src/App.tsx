@@ -1,12 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { ethers } from "ethers";
 
 import { sequence } from "0xsequence";
 
 import { ETHAuth, Proof } from "@0xsequence/ethauth";
-import { ERC_20_ABI } from "./constants/abi";
 import GAME_ABI from "./GameItems.json";
-//import { sequenceContext } from '@0xsequence/network'
 
 import { configureLogger } from "@0xsequence/utils";
 import { Button } from "./components/Button";
@@ -18,6 +16,8 @@ import { Group } from "./components/Group";
 configureLogger({ logLevel: "DEBUG" });
 
 const App = () => {
+  const [selectedMetaData, setSelectedMetaData] = useState(null);
+
   const network = "rinkeby";
   const wallet = new sequence.Wallet(network);
 
@@ -153,11 +153,50 @@ const App = () => {
     console.log("networks:", await wallet.getNetworks());
   };
 
+  const uploadAndSetMetaData = async (event: any) => {
+    if (event && event.target && event.target.files) {
+      const file = event.target.files[0];
+
+      const form = new FormData();
+
+      form.append("file", file);
+      const options = {
+        method: "POST",
+        body: form,
+        headers: {
+          Authorization: "",
+        },
+      };
+
+      const imageFileData = await fetch(
+        "https://api.nftport.xyz/v0/files",
+        options
+      ).then((response) => response.json());
+
+      const metaDataOptions = {
+        method: "POST",
+        body: JSON.stringify({
+          name: "My Arttttt",
+          description: "This is my custom art piece",
+          file_url: imageFileData.ipfs_url,
+        }),
+        headers: {
+          Authorization: "",
+        },
+      };
+
+      const nftMetaData = await fetch(
+        "https://api.nftport.xyz/v0/metadata",
+        metaDataOptions
+      ).then((response) => response.json());
+
+      setSelectedMetaData(nftMetaData);
+    }
+  };
+
   const createToken = async () => {
     const signer = wallet.getSigner(); // select DefaultChain signer by default
-
     const gameContractAddress = "0x02Ce10542B0f787438175c42F02111FF3Bbc0F8f"; // (Game address on Rinkeby)
-
     const tx: sequence.transactions.Transaction = {
       delegateCall: false,
       revertOnError: false,
@@ -166,14 +205,9 @@ const App = () => {
       value: 0,
       data: new ethers.utils.Interface(GAME_ABI).encodeFunctionData(
         "createToken",
-        [
-          1,
-          "ipfs://bafkreieggymjltgxgwyxulsuxor7hhy62cgrbq6vsna3cmroupm5jpg7mi",
-          5,
-        ]
+        [2, selectedMetaData, 5]
       ),
     };
-
     const txnResp = await signer.sendTransactionBatch([tx]);
     await txnResp.wait();
   };
@@ -190,7 +224,7 @@ const App = () => {
       to: gameContractAddress,
       value: 0,
       data: new ethers.utils.Interface(GAME_ABI).encodeFunctionData("claim", [
-        1,
+        2,
       ]),
     };
 
@@ -230,6 +264,13 @@ const App = () => {
       </Group>
 
       <Group label="Create token" layout="grid">
+        <input
+          type="file"
+          name="myImage"
+          onChange={(event) => {
+            uploadAndSetMetaData(event);
+          }}
+        />
         <Button onClick={() => createToken()}>Create token</Button>
       </Group>
 
