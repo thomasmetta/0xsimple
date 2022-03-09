@@ -3,7 +3,7 @@
   "description": "Ethereum Demo Dapp built on Sequence stack",
   "version": "0.1.0",
   "private": true,
-  "homepage": "demo-dapp",
+  "homepage": "/",
   "scripts": {
     "dev": "BROWSER=none yarn start",
     "start": "PORT=4000 react-scripts start",
@@ -14,7 +14,6 @@
     "unlink-sequence": "yarn unlink 0xsequence @0xsequence/abi @0xsequence/api @0xsequence/auth @0xsequence/config @0xsequence/guard @0xsequence/multicall @0xsequence/network @0xsequence/provider @0xsequence/relayer @0xsequence/transactions @0xsequence/utils @0xsequence/wallet"
   },
   "dependencies": {
-    "0xsequence": "^0.35.12",
     "@0xsequence/ethauth": "0.6.0",
     "@radix-ui/colors": "^0.1.8",
     "@stitches/react": "^1.2.6",
@@ -25,9 +24,11 @@
     "@types/node": "^16.11.22",
     "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.11",
+    "0xsequence": "^0.35.12",
     "ethers": "^5.5.4",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-router-dom": "^6.2.2",
     "react-scripts": "5.0.0",
     "typescript": "^4.5.5",
     "web-vitals": "^2.1.4"
