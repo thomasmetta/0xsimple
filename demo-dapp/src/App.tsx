@@ -11,6 +11,7 @@ import { Button } from "./components/Button";
 import { styled, typography } from "./style";
 
 import logoUrl from "./images/logo.svg";
+import ipfsLogoUrl from "./images/ipfs.svg";
 import { Group } from "./components/Group";
 
 configureLogger({ logLevel: "DEBUG" });
@@ -321,7 +322,8 @@ const App = () => {
       </Group>
 
       <Footer> Power By </Footer>
-      <SequenceLogo alt="logo" src={logoUrl} />
+      <Logo alt="logo" src={logoUrl} />
+      <Logo alt="logo" src={ipfsLogoUrl} />
     </Container>
   );
 };
@@ -332,8 +334,9 @@ const Container = styled("div", {
   maxWidth: "720px",
 });
 
-const SequenceLogo = styled("img", {
+const Logo = styled("img", {
   height: "40px",
+  marginRight: "20px",
 });
 
 const Title = styled("h1", typography.h1, {
