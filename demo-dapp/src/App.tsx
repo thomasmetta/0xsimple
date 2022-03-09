@@ -177,7 +177,7 @@ const App = () => {
         method: "POST",
         body: form,
         headers: {
-          Authorization: "",
+          Authorization: process.env.NFTPORT_API_KEY,
         },
       };
 
@@ -194,7 +194,7 @@ const App = () => {
           file_url: imageFileData.ipfs_url,
         }),
         headers: {
-          Authorization: "",
+          Authorization: process.env.NFTPORT_API_KEY,
         },
       };
 
