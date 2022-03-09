@@ -27,7 +27,7 @@ const App = () => {
 
   const network = "rinkeby";
   const gameContractAddress =
-    "0xD4fE9BBC942266BFB0734a0DE61F8ccc96B13fba".toLowerCase(); // (Game address on Rinkeby
+    "0x3751089F7B3E7B103BF0E8e2FCF9A91970F1aa89".toLowerCase(); // (Game address on Rinkeby
 
   const wallet = new sequence.Wallet(network);
 
@@ -41,6 +41,12 @@ const App = () => {
 
   useEffect(() => {
     async function fetchMetaData() {
+      const response = await indexer.getTokenSupplies({
+        contractAddress: gameContractAddress,
+      });
+
+      console.log(response);
+
       const { balances } = await indexer.getTokenBalances({
         contractAddress: gameContractAddress,
         accountAddress: "0x2c0c40D53A7F39bC30b476192128c450d34060C4",
@@ -168,42 +174,6 @@ const App = () => {
     console.log("TODO");
   };
 
-  const getChainID = async () => {
-    console.log("chainId:", await wallet.getChainId());
-
-    const provider = wallet.getProvider();
-    console.log("provider.getChainId()", await provider!.getChainId());
-
-    const signer = wallet.getSigner();
-    console.log("signer.getChainId()", await signer.getChainId());
-  };
-
-  const getAccounts = async () => {
-    console.log("getAddress():", await wallet.getAddress());
-
-    const provider = wallet.getProvider();
-    console.log("accounts:", await provider!.listAccounts());
-  };
-
-  const getBalance = async () => {
-    const provider = wallet.getProvider();
-    const account = await wallet.getAddress();
-    const balanceChk1 = await provider!.getBalance(account);
-    console.log("balance check 1", balanceChk1.toString());
-
-    const signer = wallet.getSigner();
-    const balanceChk2 = await signer.getBalance();
-    console.log("balance check 2", balanceChk2.toString());
-  };
-
-  const getWalletState = async () => {
-    console.log("wallet state:", await wallet.getSigner().getWalletState());
-  };
-
-  const getNetworks = async () => {
-    console.log("networks:", await wallet.getNetworks());
-  };
-
   const handleChange = (e: any) =>
     setInputs((prevState) => ({
       ...prevState,
@@ -280,7 +250,7 @@ const App = () => {
       to: gameContractAddress,
       value: 0,
       data: new ethers.utils.Interface(GAME_ABI).encodeFunctionData("claim", [
-        2,
+        1,
       ]),
     };
 
