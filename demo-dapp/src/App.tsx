@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 
 import { sequence } from "0xsequence";
@@ -26,14 +26,56 @@ const App = () => {
   });
 
   const network = "rinkeby";
-  const gameContractAddress = "0xD4fE9BBC942266BFB0734a0DE61F8ccc96B13fba"; // (Game address on Rinkeby
+  const gameContractAddress =
+    "0xD4fE9BBC942266BFB0734a0DE61F8ccc96B13fba".toLowerCase(); // (Game address on Rinkeby
 
   const wallet = new sequence.Wallet(network);
 
-  // NOTE: to use mumbai, first go to https://sequence.app and click on "Enable Testnet".
-  // As well, make sure to comment out any other `const wallet = ..` statements.
-  // const network = 'mumbai'
-  // const wallet = new sequence.Wallet(network)
+  const indexer = new sequence.indexer.SequenceIndexerClient(
+    "https://rinkeby-indexer.sequence.app"
+  );
+
+  const metadata = new sequence.metadata.SequenceMetadataClient(
+    "http://localhost:8080/https://metadata.sequence.app"
+  );
+
+  useEffect(() => {
+    async function fetchMetaData() {
+      const { balances } = await indexer.getTokenBalances({
+        contractAddress: gameContractAddress,
+        accountAddress: "0x2c0c40D53A7F39bC30b476192128c450d34060C4",
+      });
+
+      const tokenIds = balances.map((balance) => {
+        if (gameContractAddress == balance.contractAddress) {
+          return balance.tokenID;
+        }
+      });
+
+      const chainID = await wallet.getChainId();
+
+      const { contractInfoMap } = await metadata.getContractInfoBatch({
+        chainID: JSON.stringify(chainID),
+        contractAddresses: [gameContractAddress],
+      });
+
+      const contractAddress = Object.keys(contractInfoMap);
+      const contractTokenMap: any = {};
+
+      contractAddress.forEach((address) => {
+        contractTokenMap[address] = tokenIds;
+      });
+
+      const { contractTokenMetadata } = await metadata.getTokenMetadataBatch({
+        chainID: JSON.stringify(chainID),
+        contractTokenMap: contractTokenMap,
+      });
+
+      console.log(contractTokenMetadata);
+    }
+
+    fetchMetaData();
+  }, []);
 
   // Example of changing the walletAppURL
   // const wallet = new sequence.Wallet(network, { walletAppURL: 'https://sequence.app' })
@@ -238,15 +280,13 @@ const App = () => {
       to: gameContractAddress,
       value: 0,
       data: new ethers.utils.Interface(GAME_ABI).encodeFunctionData("claim", [
-        0,
+        2,
       ]),
     };
 
     const txnResp = await signer.sendTransactionBatch([tx]);
     await txnResp.wait();
   };
-
-  console.log(inputs);
 
   return (
     <Container>
