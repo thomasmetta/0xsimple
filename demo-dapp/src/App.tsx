@@ -17,6 +17,7 @@ configureLogger({ logLevel: "DEBUG" });
 
 const App = () => {
   const [selectedMetaData, setSelectedMetaData] = useState(null);
+  const [collectionMetaData, setCollectionMetaData] = useState({});
 
   const [inputs, setInputs] = useState({
     tokenId: null,
@@ -25,14 +26,14 @@ const App = () => {
     description: null,
   });
 
-  const network = "rinkeby";
+  const network = "polygon";
   const gameContractAddress =
-    "0x3751089F7B3E7B103BF0E8e2FCF9A91970F1aa89".toLowerCase(); // (Game address on Rinkeby
+    "0x69965DA127E9ACA34cED1c94a57856172150DbCd".toLowerCase(); // (Game address on polygon
 
   const wallet = new sequence.Wallet(network);
 
   const indexer = new sequence.indexer.SequenceIndexerClient(
-    "https://rinkeby-indexer.sequence.app"
+    "https://polygon-indexer.sequence.app"
   );
 
   const metadata = new sequence.metadata.SequenceMetadataClient(
@@ -45,11 +46,9 @@ const App = () => {
         contractAddress: gameContractAddress,
       });
 
-      console.log(response);
-
       const { balances } = await indexer.getTokenBalances({
         contractAddress: gameContractAddress,
-        accountAddress: "0x2c0c40D53A7F39bC30b476192128c450d34060C4",
+        accountAddress: "0xAF2c02C859b32619BC2402ddb9cC268dEA0C8522",
       });
 
       const tokenIds = balances.map((balance) => {
@@ -77,12 +76,13 @@ const App = () => {
         contractTokenMap: contractTokenMap,
       });
 
-      console.log(contractTokenMetadata);
+      setCollectionMetaData(contractTokenMetadata[gameContractAddress]);
     }
 
     fetchMetaData();
   }, []);
 
+  console.log(collectionMetaData);
   // Example of changing the walletAppURL
   // const wallet = new sequence.Wallet(network, { walletAppURL: 'https://sequence.app' })
 
@@ -156,22 +156,6 @@ const App = () => {
 
   const closeWallet = () => {
     wallet.closeWallet();
-  };
-
-  const isConnected = async () => {
-    console.log("isConnected?", wallet.isConnected());
-  };
-
-  const isOpened = async () => {
-    console.log("isOpened?", wallet.isOpened());
-  };
-
-  const getDefaultChainID = async () => {
-    console.log("TODO");
-  };
-
-  const getAuthChainID = async () => {
-    console.log("TODO");
   };
 
   const handleChange = (e: any) =>
@@ -250,7 +234,7 @@ const App = () => {
       to: gameContractAddress,
       value: 0,
       data: new ethers.utils.Interface(GAME_ABI).encodeFunctionData("claim", [
-        1,
+        0,
       ]),
     };
 
@@ -260,8 +244,6 @@ const App = () => {
 
   return (
     <Container>
-      <SequenceLogo alt="logo" src={logoUrl} />
-
       <Title>
         Demo Dapp ({network && network.length > 0 ? network : "mainnet"})
       </Title>
@@ -325,6 +307,9 @@ const App = () => {
       <Group label="Transactions" layout="grid">
         <Button onClick={() => claim1155Tokens()}>Claim ERC-1155 Tokens</Button>
       </Group>
+
+      <Footer> Power By </Footer>
+      <SequenceLogo alt="logo" src={logoUrl} />
     </Container>
   );
 };
@@ -352,6 +337,11 @@ const SubTitle = styled("h2", typography.h2, {
 const Description = styled("p", typography.b1, {
   color: "$textSecondary",
   marginBottom: "15px",
+});
+
+const Footer = styled("p", typography.b1, {
+  color: "$textSecondary",
+  marginBottom: "10px",
 });
 
 export default React.memo(App);

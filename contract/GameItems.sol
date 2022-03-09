@@ -16,7 +16,7 @@ contract GameItems is ERC1155, Ownable {
     }
 
     function contractURI() public view returns (string memory) {
-        return "https://ipfs.io/ipfs/bafkreidii4qgghama3uepncfbv6qmg4xoyuxeywftjklqqfhzunttoz3sa";
+        return "https://ipfs.io/ipfs/bafkreiacht7yzfxwl2jni33wvtwaj3joo2xdeanjg4eech3zlc4jj6mlbe";
     }
 
     function createToken(uint256 tokenId, string memory uri, uint supply) public onlyOwner {
@@ -29,7 +29,7 @@ contract GameItems is ERC1155, Ownable {
         if(_allowList[tokenId][owner()] == true) {
             require(_allowList[tokenId][msg.sender] == true, "address not in allowList");
         }
-        
+        require(balanceOf(msg.sender, tokenId) == 0, "This address already claimed the asset");
         require(_availableSupply[tokenId] > 0, "No more supply");
         _availableSupply[tokenId] = _availableSupply[tokenId] - 1;
         _mint(msg.sender, tokenId, 1, "");
