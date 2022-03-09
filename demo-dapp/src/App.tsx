@@ -17,7 +17,7 @@ configureLogger({ logLevel: "DEBUG" });
 
 const App = () => {
   const [selectedMetaData, setSelectedMetaData] = useState(null);
-  const [collectionMetaData, setCollectionMetaData] = useState({});
+  const [collectionMetaData, setCollectionMetaData] = useState<any>([]);
 
   const [inputs, setInputs] = useState({
     tokenId: null,
@@ -42,20 +42,22 @@ const App = () => {
 
   useEffect(() => {
     async function fetchMetaData() {
-      const response = await indexer.getTokenSupplies({
+      const { tokenIDs } = await indexer.getTokenSupplies({
         contractAddress: gameContractAddress,
       });
 
-      const { balances } = await indexer.getTokenBalances({
-        contractAddress: gameContractAddress,
-        accountAddress: "0xAF2c02C859b32619BC2402ddb9cC268dEA0C8522",
-      });
+      const tokenIds = tokenIDs.map((tokenId) => tokenId.tokenID);
 
-      const tokenIds = balances.map((balance) => {
-        if (gameContractAddress == balance.contractAddress) {
-          return balance.tokenID;
-        }
-      });
+      // const { balances } = await indexer.getTokenBalances({
+      //   contractAddress: gameContractAddress,
+      //   accountAddress: "0xAF2c02C859b32619BC2402ddb9cC268dEA0C8522",
+      // });
+
+      // const tokenIds = balances.map((balance) => {
+      //   if (gameContractAddress == balance.contractAddress) {
+      //     return balance.tokenID;
+      //   }
+      // });
 
       const chainID = await wallet.getChainId();
 
@@ -82,7 +84,6 @@ const App = () => {
     fetchMetaData();
   }, []);
 
-  console.log(collectionMetaData);
   // Example of changing the walletAppURL
   // const wallet = new sequence.Wallet(network, { walletAppURL: 'https://sequence.app' })
 
@@ -245,11 +246,9 @@ const App = () => {
   return (
     <Container>
       <Title>
-        Demo Dapp ({network && network.length > 0 ? network : "mainnet"})
+        0xSimple Admin Dashboard (
+        {network && network.length > 0 ? network : "mainnet"})
       </Title>
-      <Description>
-        Please open your browser dev inspector to view output of functions below
-      </Description>
 
       <Group label="Connection" layout="grid">
         <Button onClick={() => connect()}>Connect</Button>
@@ -304,6 +303,19 @@ const App = () => {
         </Group>
       </Group>
 
+      <Group label="Current Collection" layout="rows">
+        {collectionMetaData.map((item: any) => {
+          return (
+            <Item key={item.tokenId}>
+              <img src={item.image} alt={item.name} />
+              <Title>Title: {item.name}</Title>
+              <Description>Description: {item.description}</Description>
+              <Description>Token Id: {item.tokenId}</Description>
+            </Item>
+          );
+        })}
+      </Group>
+
       <Group label="Transactions" layout="grid">
         <Button onClick={() => claim1155Tokens()}>Claim ERC-1155 Tokens</Button>
       </Group>
@@ -337,6 +349,13 @@ const SubTitle = styled("h2", typography.h2, {
 const Description = styled("p", typography.b1, {
   color: "$textSecondary",
   marginBottom: "15px",
+});
+
+const Item = styled("div", {
+  color: "$textSecondary",
+  borderStyle: "solid",
+  width: "500px",
+  paddingLeft: "150px",
 });
 
 const Footer = styled("p", typography.b1, {
