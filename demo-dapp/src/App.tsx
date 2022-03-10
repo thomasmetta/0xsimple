@@ -41,7 +41,7 @@ const App = () => {
     "https://metadata.sequence.app"
   );
 
-  const NFTPORT_API_KEY: any = process.env.NFTPORT_API_KEY;
+  const NFTPORT_API_KEY: any = process.env.REACT_APP_NFTPORT_API_KEY;
 
   useEffect(() => {
     async function fetchMetaData() {
