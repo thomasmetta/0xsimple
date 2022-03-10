@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 
 import { sequence } from "0xsequence";
 
-import { ETHAuth, Proof } from "@0xsequence/ethauth";
+import { ETHAuth } from "@0xsequence/ethauth";
 import GAME_ABI from "./GameItems.json";
 
 import { configureLogger } from "@0xsequence/utils";
@@ -15,9 +15,10 @@ import { Group } from "./components/Group";
 
 configureLogger({ logLevel: "DEBUG" });
 
-const App = () => {
+const Admin = () => {
   const [selectedMetaData, setSelectedMetaData] = useState(null);
   const [collectionMetaData, setCollectionMetaData] = useState<any>([]);
+  const [accountAddress, setAccountAddress] = useState<string>("");
 
   const [inputs, setInputs] = useState({
     tokenId: null,
@@ -27,6 +28,8 @@ const App = () => {
   });
 
   const network = "polygon";
+  const gameContractOwnerAddress =
+    "0xAF2c02C859b32619BC2402ddb9cC268dEA0C8522".toLowerCase(); // (Owner address on polyon)
   const gameContractAddress =
     "0x69965DA127E9ACA34cED1c94a57856172150DbCd".toLowerCase(); // (Game address on polygon
 
@@ -44,22 +47,14 @@ const App = () => {
 
   useEffect(() => {
     async function fetchMetaData() {
+      const accountAddress = await wallet.getAddress();
+      setAccountAddress(accountAddress.toLocaleLowerCase());
+
       const { tokenIDs } = await indexer.getTokenSupplies({
         contractAddress: gameContractAddress,
       });
 
       const tokenIds = tokenIDs.map((tokenId) => tokenId.tokenID);
-
-      // const { balances } = await indexer.getTokenBalances({
-      //   contractAddress: gameContractAddress,
-      //   accountAddress: "0xAF2c02C859b32619BC2402ddb9cC268dEA0C8522",
-      // });
-
-      // const tokenIds = balances.map((balance) => {
-      //   if (gameContractAddress == balance.contractAddress) {
-      //     return balance.tokenID;
-      //   }
-      // });
 
       const chainID = await wallet.getChainId();
 
@@ -227,24 +222,6 @@ const App = () => {
     await txnResp.wait();
   };
 
-  const claim1155Tokens = async (signer?: sequence.provider.Web3Signer) => {
-    signer = signer || wallet.getSigner(); // select DefaultChain signer by default
-
-    const tx: sequence.transactions.Transaction = {
-      delegateCall: false,
-      revertOnError: false,
-      gasLimit: "0x55555",
-      to: gameContractAddress,
-      value: 0,
-      data: new ethers.utils.Interface(GAME_ABI).encodeFunctionData("claim", [
-        0,
-      ]),
-    };
-
-    const txnResp = await signer.sendTransactionBatch([tx]);
-    await txnResp.wait();
-  };
-
   return (
     <Container>
       <Title>
@@ -260,63 +237,69 @@ const App = () => {
         <Button onClick={() => closeWallet()}>Close Wallet</Button>
       </Group>
 
-      <Group label="Create token" layout="grid">
-        <Group layout="rows">
-          <SubTitle>Name:</SubTitle>
-          <input
-            name="name"
-            value={inputs.name || ""}
-            onChange={handleChange}
-          />
+      {accountAddress === gameContractOwnerAddress ? (
+        <>
+          <Group label="Create token" layout="grid">
+            <Group layout="rows">
+              <SubTitle>Name:</SubTitle>
+              <input
+                name="name"
+                value={inputs.name || ""}
+                onChange={handleChange}
+              />
 
-          <SubTitle>Description:</SubTitle>
-          <input
-            name="description"
-            value={inputs.description || ""}
-            onChange={handleChange}
-          />
+              <SubTitle>Description:</SubTitle>
+              <input
+                name="description"
+                value={inputs.description || ""}
+                onChange={handleChange}
+              />
 
-          <SubTitle>Upload asset</SubTitle>
-          <input
-            type="file"
-            name="myImage"
-            onChange={(event) => {
-              uploadAndSetMetaData(event);
-            }}
-          />
-        </Group>
-        <Group layout="rows">
-          <SubTitle>Token Id:</SubTitle>
-          <input
-            name="tokenId"
-            value={inputs.tokenId || ""}
-            onChange={handleChange}
-          />
+              <SubTitle>Upload asset</SubTitle>
+              <input
+                type="file"
+                name="myImage"
+                onChange={(event) => {
+                  uploadAndSetMetaData(event);
+                }}
+              />
+            </Group>
+            <Group layout="rows">
+              <SubTitle>Token Id:</SubTitle>
+              <input
+                name="tokenId"
+                value={inputs.tokenId || ""}
+                onChange={handleChange}
+              />
 
-          <SubTitle>Max Supply:</SubTitle>
-          <input
-            name="maxSupply"
-            value={inputs.maxSupply || ""}
-            onChange={handleChange}
-          />
-        </Group>
-        <Group layout="rows">
-          <Button onClick={() => createToken()}>Create token</Button>
-        </Group>
-      </Group>
+              <SubTitle>Max Supply:</SubTitle>
+              <input
+                name="maxSupply"
+                value={inputs.maxSupply || ""}
+                onChange={handleChange}
+              />
+            </Group>
+            <Group layout="rows">
+              <Button onClick={() => createToken()}>Create token</Button>
+            </Group>
+          </Group>
 
-      <Group label="Current Collection" layout="rows">
-        {collectionMetaData.map((item: any) => {
-          return (
-            <Item key={item.tokenId}>
-              <img src={item.image} alt={item.name} />
-              <Title>Title: {item.name}</Title>
-              <Description>Description: {item.description}</Description>
-              <Description>Token Id: {item.tokenId}</Description>
-            </Item>
-          );
-        })}
-      </Group>
+          <Group label="Current Collection" layout="rows">
+            {collectionMetaData.map((item: any) => {
+              return (
+                <Item key={item.tokenId}>
+                  <img src={item.image} alt={item.name} />
+                  <Title>Title: {item.name}</Title>
+                  <Description>Description: {item.description}</Description>
+                  <Description>Token Id: {item.tokenId}</Description>
+                </Item>
+              );
+            })}
+          </Group>
+        </>
+      ) : (
+        <SubTitle>You don't have admin right 😭</SubTitle>
+      )}
 
       <Footer />
     </Container>
@@ -351,4 +334,4 @@ const Item = styled("div", {
   paddingLeft: "150px",
 });
 
-export default React.memo(App);
+export default React.memo(Admin);
