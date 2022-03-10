@@ -38,7 +38,7 @@ const App = () => {
   );
 
   const metadata = new sequence.metadata.SequenceMetadataClient(
-    "http://localhost:8080/https://metadata.sequence.app"
+    "https://metadata.sequence.app"
   );
 
   useEffect(() => {
