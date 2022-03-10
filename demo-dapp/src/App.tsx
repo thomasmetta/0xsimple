@@ -120,7 +120,7 @@ const App = () => {
 
   const connect = async (authorize: boolean = false) => {
     const connectDetails = await wallet.connect({
-      app: "Demo Dapp",
+      app: "0xSimple dashboard",
       authorize,
       // keepWalletOpened: true
     });
