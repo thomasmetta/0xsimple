@@ -10,10 +10,7 @@ import { configureLogger } from "@0xsequence/utils";
 import { Button } from "./components/Button";
 import { styled, typography } from "./style";
 
-import logoUrl from "./images/logo.svg";
-import ipfsLogoUrl from "./images/ipfs.svg";
-import polygonLogoUrl from "./images/polygon.svg";
-
+import { Footer } from "./components/Footer";
 import { Group } from "./components/Group";
 
 configureLogger({ logLevel: "DEBUG" });
@@ -209,10 +206,7 @@ const App = () => {
         })}
       </Group>
 
-      <Footer> Power By </Footer>
-      <Logo alt="logo" src={logoUrl} />
-      <Logo alt="logo" src={ipfsLogoUrl} />
-      <Logo alt="logo" src={polygonLogoUrl} />
+      <Footer />
     </Container>
   );
 };
@@ -221,11 +215,6 @@ const Container = styled("div", {
   padding: "80px 25px 80px",
   margin: "0 auto",
   maxWidth: "720px",
-});
-
-const Logo = styled("img", {
-  height: "40px",
-  marginRight: "20px",
 });
 
 const Title = styled("h1", typography.h1, {
@@ -248,11 +237,6 @@ const Item = styled("div", {
   borderStyle: "solid",
   width: "500px",
   padding: "50px",
-});
-
-const Footer = styled("p", typography.b1, {
-  color: "$textSecondary",
-  marginBottom: "10px",
 });
 
 export default React.memo(App);
