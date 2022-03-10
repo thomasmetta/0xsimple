@@ -41,6 +41,8 @@ const App = () => {
     "https://metadata.sequence.app"
   );
 
+  const NFTPORT_API_KEY: any = process.env.NFTPORT_API_KEY;
+
   useEffect(() => {
     async function fetchMetaData() {
       const { tokenIDs } = await indexer.getTokenSupplies({
@@ -177,7 +179,7 @@ const App = () => {
         method: "POST",
         body: form,
         headers: {
-          Authorization: process.env.NFTPORT_API_KEY,
+          Authorization: NFTPORT_API_KEY,
         },
       };
 
@@ -194,7 +196,7 @@ const App = () => {
           file_url: imageFileData.ipfs_url,
         }),
         headers: {
-          Authorization: process.env.NFTPORT_API_KEY,
+          Authorization: NFTPORT_API_KEY,
         },
       };
 
