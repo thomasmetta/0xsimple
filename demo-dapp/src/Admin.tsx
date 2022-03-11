@@ -77,7 +77,9 @@ const Admin = () => {
         contractTokenMap: contractTokenMap,
       });
 
-      setCollectionMetaData(contractTokenMetadata[gameContractAddress]);
+      setCollectionMetaData(
+        contractTokenMetadata[gameContractAddress].reverse()
+      );
     }
 
     fetchMetaData();

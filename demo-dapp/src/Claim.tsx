@@ -82,7 +82,7 @@ const App = () => {
       contractTokenMap: contractTokenMap,
     });
 
-    setCollectionMetaData(contractTokenMetadata[gameContractAddress]);
+    setCollectionMetaData(contractTokenMetadata[gameContractAddress].reverse());
   }
 
   // Example of changing the walletAppURL
