@@ -20,6 +20,8 @@ const Admin = () => {
   const [selectedMetaData, setSelectedMetaData] = useState(null);
   const [collectionMetaData, setCollectionMetaData] = useState<any>([]);
   const [accountAddress, setAccountAddress] = useState<string>("");
+  const [isIPFSUploadLoading, setIsIPFSUploadLoading] =
+    useState<boolean>(false);
 
   const [inputs, setInputs] = useState({
     tokenId: null,
@@ -168,6 +170,7 @@ const Admin = () => {
 
   const uploadAndSetMetaData = async (event: any) => {
     if (event && event.target && event.target.files) {
+      setIsIPFSUploadLoading(true);
       const file = event.target.files[0];
 
       const form = new FormData();
@@ -205,6 +208,9 @@ const Admin = () => {
 
       setSelectedMetaData(nftMetaData.metadata_uri);
       console.log(nftMetaData.metadata_uri);
+      if (nftMetaData) {
+        setIsIPFSUploadLoading(false);
+      }
     }
   };
 
@@ -267,6 +273,7 @@ const Admin = () => {
                   uploadAndSetMetaData(event);
                 }}
               />
+              {isIPFSUploadLoading && <SubTitle>Uploading</SubTitle>}
             </Group>
             <Group layout="rows">
               <SubTitle>Token Id:</SubTitle>
