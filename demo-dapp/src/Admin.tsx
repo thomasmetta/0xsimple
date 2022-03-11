@@ -28,7 +28,7 @@ const Admin = () => {
     description: null,
   });
 
-  const network = "rinkeby";
+  const network = "polygon";
   const gameContractOwnerAddress =
     networkConfig[network].gameContractOwnerAddress.toLowerCase();
 

@@ -20,7 +20,7 @@ const App = () => {
   const [collectionMetaData, setCollectionMetaData] = useState<any>([]);
   const [accountAddress, setAccountAddress] = useState<string>("");
 
-  const network = "rinkeby";
+  const network = "polygon";
   const gameContractAddress =
     networkConfig[network].gameContractAddress.toLowerCase();
 
