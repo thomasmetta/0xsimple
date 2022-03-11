@@ -17,6 +17,7 @@ configureLogger({ logLevel: "DEBUG" });
 
 const App = () => {
   const [collectionMetaData, setCollectionMetaData] = useState<any>([]);
+  const [accountAddress, setAccountAddress] = useState<string>("");
 
   const network = "polygon";
   const gameContractAddress =
@@ -33,54 +34,55 @@ const App = () => {
   );
 
   useEffect(() => {
-    async function fetchMetaData() {
-      const accountAddress = await wallet.getAddress();
-
-      const { balances } = await indexer.getTokenBalances({
-        contractAddress: gameContractAddress,
-        accountAddress: accountAddress,
-      });
-
-      const accountBalanceTokenIds = balances.map((balance) => {
-        if (gameContractAddress == balance.contractAddress) {
-          return balance.tokenID;
-        }
-      });
-
-      const { tokenIDs } = await indexer.getTokenSupplies({
-        contractAddress: gameContractAddress,
-      });
-
-      const tokenSupplyTokenIds = tokenIDs.map((tokenId) => tokenId.tokenID);
-
-      const tokenIds = tokenSupplyTokenIds.filter(
-        (x: any) => !accountBalanceTokenIds.includes(x)
-      );
-
-      const chainID = await wallet.getChainId();
-
-      const { contractInfoMap } = await metadata.getContractInfoBatch({
-        chainID: JSON.stringify(chainID),
-        contractAddresses: [gameContractAddress],
-      });
-
-      const contractAddress = Object.keys(contractInfoMap);
-      const contractTokenMap: any = {};
-
-      contractAddress.forEach((address) => {
-        contractTokenMap[address] = tokenIds;
-      });
-
-      const { contractTokenMetadata } = await metadata.getTokenMetadataBatch({
-        chainID: JSON.stringify(chainID),
-        contractTokenMap: contractTokenMap,
-      });
-
-      setCollectionMetaData(contractTokenMetadata[gameContractAddress]);
-    }
-
     fetchMetaData();
   }, []);
+
+  async function fetchMetaData() {
+    const accountAddress = await wallet.getAddress();
+    setAccountAddress(accountAddress);
+
+    const { balances } = await indexer.getTokenBalances({
+      contractAddress: gameContractAddress,
+      accountAddress: accountAddress,
+    });
+
+    const accountBalanceTokenIds = balances.map((balance) => {
+      if (gameContractAddress == balance.contractAddress) {
+        return balance.tokenID;
+      }
+    });
+
+    const { tokenIDs } = await indexer.getTokenSupplies({
+      contractAddress: gameContractAddress,
+    });
+
+    const tokenSupplyTokenIds = tokenIDs.map((tokenId) => tokenId.tokenID);
+
+    const tokenIds = tokenSupplyTokenIds.filter(
+      (x: any) => !accountBalanceTokenIds.includes(x)
+    );
+
+    const chainID = await wallet.getChainId();
+
+    const { contractInfoMap } = await metadata.getContractInfoBatch({
+      chainID: JSON.stringify(chainID),
+      contractAddresses: [gameContractAddress],
+    });
+
+    const contractAddress = Object.keys(contractInfoMap);
+    const contractTokenMap: any = {};
+
+    contractAddress.forEach((address) => {
+      contractTokenMap[address] = tokenIds;
+    });
+
+    const { contractTokenMetadata } = await metadata.getTokenMetadataBatch({
+      chainID: JSON.stringify(chainID),
+      contractTokenMap: contractTokenMap,
+    });
+
+    setCollectionMetaData(contractTokenMetadata[gameContractAddress]);
+  }
 
   // Example of changing the walletAppURL
   // const wallet = new sequence.Wallet(network, { walletAppURL: 'https://sequence.app' })
@@ -121,6 +123,8 @@ const App = () => {
     });
 
     console.warn("connectDetails", { connectDetails });
+
+    fetchMetaData();
 
     if (authorize) {
       const ethAuth = new ETHAuth();
@@ -182,29 +186,39 @@ const App = () => {
       </Title>
       <Description>Get exclusive FREE in-game loot</Description>
 
-      <Group label="Connection" layout="grid">
-        <Button onClick={() => connect()}>Connect</Button>
-        <Button onClick={() => connect(true)}>Connect & Auth</Button>
-        <Button onClick={() => disconnect()}>Disconnect</Button>
-        <Button onClick={() => openWallet()}>Open Wallet</Button>
-        <Button onClick={() => closeWallet()}>Close Wallet</Button>
-      </Group>
+      {accountAddress ? (
+        <Group label="Connection" layout="grid">
+          <Button onClick={() => disconnect()}>Disconnect</Button>
+          <Button onClick={() => openWallet()}>Open Wallet</Button>
+          <Button onClick={() => closeWallet()}>Close Wallet</Button>
+        </Group>
+      ) : (
+        <Group label="Connection" layout="grid">
+          <Button onClick={() => connect()}>Connect</Button>
+          <Button onClick={() => connect(true)}>Connect & Auth</Button>
+        </Group>
+      )}
 
-      <Group label="Current Offering" layout="rows">
-        {collectionMetaData.map((item: any) => {
-          return (
-            <Item key={item.tokenId}>
-              <img src={item.image} alt={item.name} />
-              <Title>Title: {item.name}</Title>
-              <Description>Description: {item.description}</Description>
-              <Description>Token Id: {item.tokenId}</Description>
-              <Button onClick={() => claim1155Tokens(item.tokenId)}>
-                Claim Token
-              </Button>
-            </Item>
-          );
-        })}
-      </Group>
+      {accountAddress ? (
+        <Group label="Current Offering" layout="rows">
+          {collectionMetaData &&
+            collectionMetaData.map((item: any) => {
+              return (
+                <Item key={item.tokenId}>
+                  <img src={item.image} alt={item.name} />
+                  <Title>Title: {item.name}</Title>
+                  <Description>Description: {item.description}</Description>
+                  <Description>Token Id: {item.tokenId}</Description>
+                  <Button onClick={() => claim1155Tokens(item.tokenId)}>
+                    Claim Token
+                  </Button>
+                </Item>
+              );
+            })}
+        </Group>
+      ) : (
+        <Title>Please click connect</Title>
+      )}
 
       <Footer />
     </Container>

@@ -283,19 +283,22 @@ const Admin = () => {
               <Button onClick={() => createToken()}>Create token</Button>
             </Group>
           </Group>
-
-          <Group label="Current Collection" layout="rows">
-            {collectionMetaData.map((item: any) => {
-              return (
-                <Item key={item.tokenId}>
-                  <img src={item.image} alt={item.name} />
-                  <Title>Title: {item.name}</Title>
-                  <Description>Description: {item.description}</Description>
-                  <Description>Token Id: {item.tokenId}</Description>
-                </Item>
-              );
-            })}
-          </Group>
+          (
+          {collectionMetaData && (
+            <Group label="Current Collection" layout="rows">
+              {collectionMetaData.map((item: any) => {
+                return (
+                  <Item key={item.tokenId}>
+                    <img src={item.image} alt={item.name} />
+                    <Title>Title: {item.name}</Title>
+                    <Description>Description: {item.description}</Description>
+                    <Description>Token Id: {item.tokenId}</Description>
+                  </Item>
+                );
+              })}
+            </Group>
+          )}
+          )
         </>
       ) : (
         <SubTitle>You don't have admin right 😭</SubTitle>
