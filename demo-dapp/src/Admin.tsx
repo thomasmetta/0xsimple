@@ -12,6 +12,7 @@ import { styled, typography } from "./style";
 
 import { Footer } from "./components/Footer";
 import { Group } from "./components/Group";
+import { networkConfig } from "./networkConfig";
 
 configureLogger({ logLevel: "DEBUG" });
 
@@ -27,16 +28,17 @@ const Admin = () => {
     description: null,
   });
 
-  const network = "polygon";
+  const network = "rinkeby";
   const gameContractOwnerAddress =
-    "0xAF2c02C859b32619BC2402ddb9cC268dEA0C8522".toLowerCase(); // (Owner address on polyon)
+    networkConfig[network].gameContractOwnerAddress.toLowerCase();
+
   const gameContractAddress =
-    "0x69965DA127E9ACA34cED1c94a57856172150DbCd".toLowerCase(); // (Game address on polygon
+    networkConfig[network].gameContractAddress.toLowerCase();
 
   const wallet = new sequence.Wallet(network);
 
   const indexer = new sequence.indexer.SequenceIndexerClient(
-    "https://polygon-indexer.sequence.app"
+    `https://${network}-indexer.sequence.app`
   );
 
   const metadata = new sequence.metadata.SequenceMetadataClient(
